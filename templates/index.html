@@ -1,0 +1,55 @@
+{% extends 'base.html' %} {% block body %}
+<h1 class="m-3">メモアプリ　全文検索</h1>
+<div class="input-group ml-3">
+  <form action="/" method="POST">
+    <input
+      type="text"
+      name="search_key"
+      required="required"
+      autocomplete="off"
+    />
+    <input type="submit" value="Search" />
+  </form>
+</div>
+<p class="m-3">
+  検索キーワード：<span id="search_word">{{ search_key }}</span>
+</p>
+<p class="m-3">検索結果：{{ result | length }}件 ({{ elapsed_time }} 秒)</p>
+<ul>
+  {% for i in result %}
+  <h1>
+    <a href="{{ i.url }}" style="text-decoration: none">{{ i.file_name }}</a>
+  </h1>
+  <p>{{ i.contents }}</p>
+  {% endfor %}
+</ul>
+
+<!-- ハイライト処理に関するスクリプト -->
+<script>
+  var backupOriginal = ""; //元のHTMLソースを保持しておく変数
+  var search_key = document.getElementById("search_word").innerHTML; //検索ワードを取得。
+  //文字列を検索してハイライト用要素を加える処理
+  function replacer(str, word, att) {
+    var SearchString = "(" + word + ")";
+    var RegularExp = new RegExp(SearchString, "g");
+    var ReplaceString = '<span class="' + att + '">$1</span>';
+    var ResString = str.replace(RegularExp, ReplaceString);
+    return ResString;
+  }
+
+  //ハイライトを加える処理
+  function addhighlight() {
+    backupOriginal = document.getElementById("targetspace").innerHTML;
+    var forShow = backupOriginal;
+    forShow = replacer(forShow, search_key, "mark");
+    document.getElementById("targetspace").innerHTML = forShow;
+  }
+
+  //読み込みが完了後にハイライト処理を行う
+  window.onload = function () {
+    if (search_key) {
+      addhighlight();
+    }
+  };
+</script>
+{% endblock %}
